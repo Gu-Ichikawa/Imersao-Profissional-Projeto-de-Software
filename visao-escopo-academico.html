@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documento de Visão e Escopo — Plataforma Integrada de Gestão para Bares e Restaurantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --text:#1B1B1B;
+    --muted:#5B5B5B;
+    --rule:#C9C4B8;
+    --bg:#FFFFFF;
+    --paper:#FBFAF7;
+    --accent:#5B3A29;
+    --serif:'Source Serif 4', Georgia, serif;
+    --sans:'Inter', Arial, sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--text);
+    font-family:var(--serif);
+    line-height:1.65;
+    font-size:17px;
+  }
+  .page{
+    max-width:760px;
+    margin:0 auto;
+    background:var(--bg);
+    padding:0 56px 80px;
+  }
+  @media (max-width:640px){ .page{ padding:0 22px 56px; } }
+
+  /* capa */
+  .cover{
+    padding:80px 0 40px;
+    border-bottom:2px solid var(--text);
+    text-align:center;
+  }
+  @media (max-width:640px){ .cover{ padding:56px 0 32px; } }
+  .cover .kicker{
+    font-family:var(--sans);
+    font-size:12.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:26px;
+  }
+  .cover h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:2rem;
+    line-height:1.3;
+    margin:0 0 10px;
+  }
+  .cover .subtitle{
+    font-family:var(--sans);
+    font-size:14.5px;
+    color:var(--muted);
+    margin-bottom:36px;
+  }
+  .cover-meta{
+    font-family:var(--sans);
+    font-size:13.5px;
+    color:var(--text);
+    display:inline-block;
+    text-align:left;
+    margin-top:8px;
+  }
+  .cover-meta div{ margin-bottom:4px; }
+  .cover-meta span{ color:var(--muted); display:inline-block; width:120px; }
+
+  /* sumário */
+  .toc{
+    padding:40px 0 44px;
+    border-bottom:1px solid var(--rule);
+  }
+  .toc h2{
+    font-family:var(--sans);
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 18px;
+    font-weight:600;
+  }
+  .toc ol{
+    margin:0; padding:0;
+    list-style:none;
+    columns:2;
+    column-gap:36px;
+  }
+  @media (max-width:560px){ .toc ol{ columns:1; } }
+  .toc li{ break-inside:avoid; margin-bottom:9px; }
+  .toc a{
+    font-family:var(--sans);
+    font-size:14px;
+    color:var(--text);
+    text-decoration:none;
+    display:flex;
+    gap:8px;
+  }
+  .toc a:hover{ text-decoration:underline; }
+  .toc a .n{ color:var(--muted); font-variant-numeric:tabular-nums; }
+
+  /* seções */
+  section{
+    padding:42px 0;
+    border-bottom:1px solid var(--rule);
+    scroll-margin-top:20px;
+  }
+  section:last-of-type{ border-bottom:none; }
+  .snum{
+    font-family:var(--sans);
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:.08em;
+    margin-bottom:6px;
+  }
+  h2{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:1.4rem;
+    margin:0 0 16px;
+  }
+  h3{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:1.08rem;
+    margin:22px 0 8px;
+  }
+  p{ margin:0 0 12px; max-width:64ch; }
+  ul, ol.plain{ margin:10px 0 14px 22px; padding:0; }
+  li{ margin-bottom:6px; max-width:60ch; }
+  strong{ font-weight:600; }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:14px 0 6px;
+    font-family:var(--sans);
+    font-size:13.5px;
+  }
+  th, td{
+    text-align:left;
+    padding:8px 10px;
+    border-bottom:1px solid var(--rule);
+    vertical-align:top;
+  }
+  th{
+    font-weight:600;
+    color:var(--muted);
+    font-size:11.5px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    border-bottom:1px solid var(--text);
+  }
+
+  .cols2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:28px;
+  }
+  @media (max-width:600px){ .cols2{ grid-template-columns:1fr; } }
+  .cols3{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:24px;
+  }
+  @media (max-width:600px){ .cols3{ grid-template-columns:1fr; } }
+  .subblock h3{ margin-top:0; }
+
+  .note{
+    font-family:var(--sans);
+    font-size:12.5px;
+    color:var(--muted);
+    font-style:italic;
+    margin-top:6px;
+  }
+
+  footer{
+    padding:36px 0 0;
+    font-family:var(--sans);
+    font-size:11.5px;
+    color:var(--muted);
+    text-align:center;
+  }
+
+  .back-to-top{
+    display:inline-block;
+    margin-top:10px;
+    font-family:var(--sans);
+    font-size:12px;
+    color:var(--muted);
+    text-decoration:none;
+  }
+  .back-to-top:hover{ text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="cover" id="top">
+    <div class="kicker">Documento de Visão e Escopo</div>
+    <h1>Plataforma Integrada de Gestão para Bares e Restaurantes</h1>
+    <div class="subtitle">Projeto Anual — Curso de Análise e Desenvolvimento de Sistemas</div>
+    <div class="cover-meta">
+      <div><span>Curso</span>Análise e Desenvolvimento de Sistemas — Unicesumar</div>
+      <div><span>Disciplina</span>Imersão Profissional: Projeto de Software</div>
+      <div><span>Equipe</span>Gustavo Ichikawa e equipe</div>
+      <div><span>Versão</span>1.0</div>
+      <div><span>Data</span>Agosto de 2026</div>
+    </div>
+  </div>
+
+  <nav class="toc">
+    <h2>Sumário</h2>
+    <ol>
+      <li><a href="#s1"><span class="n">1.</span>Introdução</a></li>
+      <li><a href="#s2"><span class="n">2.</span>Visão do Produto</a></li>
+      <li><a href="#s3"><span class="n">3.</span>Problema de Negócio</a></li>
+      <li><a href="#s4"><span class="n">4.</span>Oportunidade</a></li>
+      <li><a href="#s5"><span class="n">5.</span>Objetivos do Projeto</a></li>
+      <li><a href="#s6"><span class="n">6.</span>Público-Alvo</a></li>
+      <li><a href="#s7"><span class="n">7.</span>Escopo do Projeto</a></li>
+      <li><a href="#s8"><span class="n">8.</span>Limites do Sistema</a></li>
+      <li><a href="#s9"><span class="n">9.</span>Benefícios Esperados</a></li>
+      <li><a href="#s10"><span class="n">10.</span>Premissas e Restrições</a></li>
+      <li><a href="#s11"><span class="n">11.</span>Critérios de Sucesso</a></li>
+      <li><a href="#s12"><span class="n">12.</span>Visão Geral da Solução</a></li>
+      <li><a href="#s13"><span class="n">13.</span>Conclusão</a></li>
+    </ol>
+  </nav>
+
+  <section id="s1">
+    <div class="snum">1</div>
+    <h2>Introdução</h2>
+    <p>Este documento apresenta a visão e o escopo do projeto <strong>Plataforma Integrada de Gestão para Bares e Restaurantes</strong>, desenvolvido como parte do projeto anual do curso de Análise e Desenvolvimento de Sistemas da Unicesumar.</p>
+    <p>O objetivo deste documento é definir claramente o problema que será resolvido, o público-alvo, os objetivos do sistema, os limites do projeto e os principais benefícios esperados, servindo como base para o planejamento, levantamento de requisitos e desenvolvimento das próximas etapas do projeto.</p>
+  </section>
+
+  <section id="s2">
+    <div class="snum">2</div>
+    <h2>Visão do Produto</h2>
+    <p>A Plataforma Integrada de Gestão para Bares e Restaurantes é um sistema web que unifica, em uma única solução, os processos operacionais e administrativos de estabelecimentos do setor alimentício.</p>
+    <p>O sistema integra os módulos de <strong>estoque, caixa, financeiro, fiscal, recursos humanos e vendas online com delivery</strong>, permitindo que todas as informações sejam centralizadas em uma única base de dados e acessadas conforme o perfil de cada usuário.</p>
+    <p>A visão do produto é eliminar a fragmentação dos controles internos, reduzir retrabalho, aumentar a confiabilidade dos dados e fornecer suporte à tomada de decisão gerencial por meio de informações consolidadas em tempo real.</p>
+  </section>
+
+  <section id="s3">
+    <div class="snum">3</div>
+    <h2>Problema de Negócio</h2>
+    <p>Bares e restaurantes de pequeno e médio porte frequentemente utilizam ferramentas diferentes para controlar estoque, vendas, caixa, folha de pagamento e pedidos online. Essa fragmentação provoca diversos problemas operacionais, entre eles:</p>
+    <ul>
+      <li>Divergência entre estoque físico e estoque registrado</li>
+      <li>Retrabalho no lançamento de informações</li>
+      <li>Dificuldade no fechamento de caixa</li>
+      <li>Falta de integração entre vendas presenciais e vendas online</li>
+      <li>Baixa confiabilidade dos relatórios financeiros</li>
+      <li>Dificuldade de gestão de colaboradores e entregadores</li>
+    </ul>
+    <p>Como consequência, gestores tomam decisões com base em informações incompletas ou desatualizadas, comprometendo o controle financeiro e operacional do estabelecimento.</p>
+  </section>
+
+  <section id="s4">
+    <div class="snum">4</div>
+    <h2>Oportunidade</h2>
+    <p>Existe uma oportunidade de desenvolver uma plataforma única capaz de integrar a operação interna do estabelecimento com a frente de vendas ao consumidor final.</p>
+    <p>Ao centralizar todos os processos em um único sistema, qualquer venda realizada no balcão, na mesa ou pelo delivery impacta automaticamente o estoque, o caixa e o financeiro, proporcionando uma única fonte de verdade para toda a operação.</p>
+  </section>
+
+  <section id="s5">
+    <div class="snum">5</div>
+    <h2>Objetivos do Projeto</h2>
+    <h3>5.1 Objetivo Geral</h3>
+    <p>Especificar e desenvolver uma plataforma integrada de gestão para bares e restaurantes que permita controlar estoque, caixa, financeiro, fiscal, recursos humanos e vendas online em um único ambiente web.</p>
+    <h3>5.2 Objetivos Específicos</h3>
+    <ul>
+      <li>Centralizar informações operacionais e administrativas</li>
+      <li>Automatizar processos repetitivos</li>
+      <li>Integrar vendas presenciais e digitais</li>
+      <li>Reduzir erros de controle de estoque</li>
+      <li>Facilitar o fechamento de caixa</li>
+      <li>Disponibilizar relatórios gerenciais consolidados</li>
+      <li>Controlar o acesso às funcionalidades por perfil de usuário</li>
+    </ul>
+  </section>
+
+  <section id="s6">
+    <div class="snum">6</div>
+    <h2>Público-Alvo</h2>
+    <p>O sistema será utilizado por diferentes perfis de usuários.</p>
+    <div class="cols2">
+      <div class="subblock">
+        <h3>Usuários internos</h3>
+        <p><strong>Gestor / Administrador</strong> — responsável pelo acompanhamento de todos os módulos e pela tomada de decisões estratégicas.</p>
+        <p><strong>Operador de Caixa</strong> — realiza abertura e fechamento de caixa, lançamento de comandas e recebimento de pagamentos.</p>
+        <p><strong>Estoquista</strong> — controla entrada e saída de mercadorias, inventário e movimentações internas.</p>
+        <p><strong>Equipe de Cozinha</strong> — consulta pedidos, fichas técnicas e solicita reposição de insumos.</p>
+        <p><strong>Setor Administrativo / RH</strong> — gerencia colaboradores, folha de pagamento, escalas e documentos.</p>
+      </div>
+      <div class="subblock">
+        <h3>Usuários externos</h3>
+        <p><strong>Entregador (Motoboy)</strong> — recebe pedidos, confirma retiradas por QR Code e atualiza o status das entregas.</p>
+        <p><strong>Cliente Final</strong> — realiza pedidos online, efetua pagamento via Pix e acompanha o andamento da entrega.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="s7">
+    <div class="snum">7</div>
+    <h2>Escopo do Projeto</h2>
+    <h3>7.1 Funcionalidades Incluídas</h3>
+    <p>O projeto contemplará os seguintes módulos principais:</p>
+
+    <h3>Administração e Cadastros</h3>
+    <ul>
+      <li>Cadastro de clientes</li>
+      <li>Cadastro de colaboradores</li>
+      <li>Cadastro de fornecedores</li>
+      <li>Cadastro de produtos e categorias</li>
+      <li>Cadastro de cargos e departamentos</li>
+    </ul>
+
+    <h3>Estoque</h3>
+    <ul>
+      <li>Entrada de mercadorias</li>
+      <li>Saída de mercadorias</li>
+      <li>Requisições internas</li>
+      <li>Controle de perdas</li>
+      <li>Consulta de estoque em tempo real</li>
+    </ul>
+
+    <h3>Caixa e Financeiro</h3>
+    <ul>
+      <li>Abertura e fechamento de caixa</li>
+      <li>Controle de comandas</li>
+      <li>Contas a pagar</li>
+      <li>Contas a receber</li>
+      <li>Emissão de documentos fiscais</li>
+      <li>Integração com meios de pagamento</li>
+    </ul>
+
+    <h3>Recursos Humanos</h3>
+    <ul>
+      <li>Cadastro de funcionários</li>
+      <li>Folha de pagamento</li>
+      <li>Controle de escalas</li>
+      <li>Cálculo de comissões e gorjetas</li>
+    </ul>
+
+    <h3>Operação do Restaurante</h3>
+    <ul>
+      <li>Reservas de mesas</li>
+      <li>Gerenciamento básico de atendimento</li>
+    </ul>
+
+    <h3>Vendas Online e Delivery</h3>
+    <ul>
+      <li>Catálogo digital de produtos</li>
+      <li>Carrinho de compras</li>
+      <li>Checkout</li>
+      <li>Pagamento via Pix</li>
+      <li>Gestão de entregadores</li>
+      <li>Rastreamento do pedido</li>
+      <li>Acompanhamento da entrega</li>
+    </ul>
+  </section>
+
+  <section id="s8">
+    <div class="snum">8</div>
+    <h2>Limites do Sistema (Fora do Escopo)</h2>
+    <p>Nesta primeira versão do projeto <strong>não serão contempladas</strong> as seguintes funcionalidades:</p>
+    <ul>
+      <li>Aplicativo nativo para Android e iOS</li>
+      <li>Integração com plataformas externas de delivery (iFood, Uber Eats e similares)</li>
+      <li>Suporte a múltiplas filiais em uma única instalação</li>
+      <li>Múltiplos idiomas</li>
+      <li>Programa de fidelidade</li>
+      <li>Sistema avançado de compras e cotações</li>
+      <li>Ferramentas avançadas de RH, como rescisão automatizada</li>
+    </ul>
+  </section>
+
+  <section id="s9">
+    <div class="snum">9</div>
+    <h2>Benefícios Esperados</h2>
+    <div class="cols3">
+      <div class="subblock">
+        <h3>Para o estabelecimento</h3>
+        <ul>
+          <li>Redução de custos operacionais</li>
+          <li>Maior controle financeiro</li>
+          <li>Redução de perdas de estoque</li>
+          <li>Padronização de processos</li>
+          <li>Melhoria na tomada de decisão</li>
+        </ul>
+      </div>
+      <div class="subblock">
+        <h3>Para os colaboradores</h3>
+        <ul>
+          <li>Simplificação das rotinas diárias</li>
+          <li>Redução de retrabalho</li>
+          <li>Maior agilidade no atendimento</li>
+        </ul>
+      </div>
+      <div class="subblock">
+        <h3>Para os clientes</h3>
+        <ul>
+          <li>Pedidos online mais rápidos</li>
+          <li>Pagamento simplificado</li>
+          <li>Acompanhamento da entrega em tempo real</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="s10">
+    <div class="snum">10</div>
+    <h2>Premissas e Restrições</h2>
+    <div class="cols2">
+      <div class="subblock">
+        <h3>Premissas</h3>
+        <ul>
+          <li>O projeto será desenvolvido para uma única unidade (um CNPJ)</li>
+          <li>O sistema será disponibilizado como aplicação web responsiva</li>
+          <li>Haverá acesso a um estabelecimento parceiro para validação dos requisitos</li>
+          <li>Os usuários possuirão acesso à internet durante a operação</li>
+        </ul>
+      </div>
+      <div class="subblock">
+        <h3>Restrições</h3>
+        <ul>
+          <li>Tempo de desenvolvimento correspondente ao calendário acadêmico do curso</li>
+          <li>Equipe composta pelos integrantes definidos na disciplina</li>
+          <li>Utilização das tecnologias e ferramentas aprovadas pelo projeto</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="s11">
+    <div class="snum">11</div>
+    <h2>Critérios de Sucesso</h2>
+    <p>O projeto será considerado bem-sucedido quando atender aos seguintes critérios:</p>
+    <ul>
+      <li>Integração entre estoque, caixa, financeiro e vendas online</li>
+      <li>Controle de acesso por perfil de usuário</li>
+      <li>Funcionamento dos fluxos principais de venda presencial e delivery</li>
+      <li>Geração de informações consolidadas para gestão do estabelecimento</li>
+      <li>Demonstração funcional da plataforma ao final do projeto</li>
+    </ul>
+  </section>
+
+  <section id="s12">
+    <div class="snum">12</div>
+    <h2>Visão Geral da Solução</h2>
+    <p>O sistema funcionará como uma plataforma centralizada. O cliente poderá realizar pedidos pelo cardápio online ou presencialmente. Em ambos os casos, a venda será registrada no mesmo banco de dados, provocando automaticamente a baixa de estoque, o lançamento financeiro e a atualização do caixa.</p>
+    <p>O gestor acompanhará toda a operação por meio de relatórios e dashboards consolidados, enquanto cada colaborador terá acesso apenas às funcionalidades compatíveis com seu perfil.</p>
+    <p>Essa arquitetura integrada permitirá que todos os setores do estabelecimento operem de forma coordenada, reduzindo inconsistências e proporcionando maior eficiência operacional.</p>
+  </section>
+
+  <section id="s13">
+    <div class="snum">13</div>
+    <h2>Conclusão</h2>
+    <p>A Plataforma Integrada de Gestão para Bares e Restaurantes propõe resolver um problema recorrente do setor: a falta de integração entre os processos administrativos e operacionais.</p>
+    <p>O escopo definido contempla funcionalidades suficientes para sustentar o desenvolvimento durante todo o ano letivo, envolvendo levantamento de requisitos, modelagem, banco de dados, desenvolvimento web, controle de acesso, integração entre módulos e geração de relatórios gerenciais.</p>
+    <p>Dessa forma, o projeto apresenta complexidade compatível com um Trabalho de Conclusão de Curso em Análise e Desenvolvimento de Sistemas, além de possuir potencial de aplicação prática em estabelecimentos reais do setor alimentício.</p>
+  </section>
+
+  <footer>
+    Documento de Visão e Escopo · Versão 1.0 · Agosto de 2026
+    <br><a class="back-to-top" href="#top">Voltar ao início</a>
+  </footer>
+
+</div>
+</body>
+</html>
