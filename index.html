@@ -62,6 +62,18 @@
     color:var(--muted);
     margin-bottom:36px;
   }
+  .cover-meta .team-names{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .cover-meta .team-row{
+    display:flex;
+    align-items:flex-start;
+  }
+  .cover-meta .team-row span:first-child{
+    padding-top:1px;
+  }
   .cover-meta{
     font-family:var(--sans);
     font-size:13.5px;
@@ -71,7 +83,8 @@
     margin-top:8px;
   }
   .cover-meta div{ margin-bottom:4px; }
-  .cover-meta span{ color:var(--muted); display:inline-block; width:120px; }
+  .cover-meta div > span:first-child{ color:var(--muted); display:inline-block; width:120px; vertical-align:top; }
+  .cover-meta .team-names span{ display:block; width:auto; color:var(--text); }
 
   /* sumário */
   .toc{
@@ -198,6 +211,35 @@
     text-decoration:none;
   }
   .back-to-top:hover{ text-decoration:underline; }
+
+  .glossary dl{
+    margin:6px 0 0;
+    display:grid;
+    grid-template-columns:1fr;
+    row-gap:16px;
+  }
+  .glossary .term-row{
+    display:grid;
+    grid-template-columns:180px 1fr;
+    gap:18px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--rule);
+  }
+  @media (max-width:560px){
+    .glossary .term-row{ grid-template-columns:1fr; gap:4px; }
+  }
+  .glossary dt{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:14.5px;
+    color:var(--text);
+  }
+  .glossary dd{
+    margin:0;
+    font-size:15px;
+    color:var(--text);
+    max-width:52ch;
+  }
 </style>
 </head>
 <body>
@@ -210,8 +252,16 @@
     <div class="cover-meta">
       <div><span>Curso</span>Análise e Desenvolvimento de Sistemas — Unicesumar</div>
       <div><span>Disciplina</span>Imersão Profissional: Projeto de Software</div>
-      <div><span>Equipe</span>Gustavo Ichikawa e equipe</div>
-      <div><span>Versão</span>1.0</div>
+      <div class="team-row">
+        <span>Equipe</span>
+        <span class="team-names">
+          <span>Gustavo Cunha Ichikawa</span>
+          <span>Monique Muniz</span>
+          <span>João Marcos Poloni Demito</span>
+          <span>Gustavo Dena</span>
+          <span>Stephany Christine</span>
+        </span>
+      </div>
       <div><span>Data</span>Agosto de 2026</div>
     </div>
   </div>
@@ -231,7 +281,8 @@
       <li><a href="#s10"><span class="n">10.</span>Premissas e Restrições</a></li>
       <li><a href="#s11"><span class="n">11.</span>Critérios de Sucesso</a></li>
       <li><a href="#s12"><span class="n">12.</span>Visão Geral da Solução</a></li>
-      <li><a href="#s13"><span class="n">13.</span>Conclusão</a></li>
+      <li><a href="#s13"><span class="n">13.</span>Glossário de Termos</a></li>
+      <li><a href="#s14"><span class="n">14.</span>Conclusão</a></li>
     </ol>
   </nav>
 
@@ -463,8 +514,32 @@
     <p>Essa arquitetura integrada permitirá que todos os setores do estabelecimento operem de forma coordenada, reduzindo inconsistências e proporcionando maior eficiência operacional.</p>
   </section>
 
-  <section id="s13">
+  <section id="s13" class="glossary">
     <div class="snum">13</div>
+    <h2>Glossário de Termos</h2>
+    <p>Este glossário reúne os termos de negócio utilizados no domínio de bares e restaurantes, garantindo que a equipe de desenvolvimento e os demais interessados no projeto compartilhem o mesmo entendimento sobre o vocabulário do cliente.</p>
+    <dl>
+      <div class="term-row"><dt>Comanda</dt><dd>Documento (físico ou digital) que registra os pedidos de um cliente durante o atendimento, servindo de base para o fechamento da conta.</dd></div>
+      <div class="term-row"><dt>Ficha Técnica</dt><dd>Descrição padronizada dos insumos, quantidades e modo de preparo de um prato, usada para controlar custo e padronizar a produção na cozinha.</dd></div>
+      <div class="term-row"><dt>CMV (Custo da Mercadoria Vendida)</dt><dd>Percentual do faturamento gasto com os insumos utilizados na produção dos itens efetivamente vendidos.</dd></div>
+      <div class="term-row"><dt>Ticket Médio</dt><dd>Valor médio gasto por cliente em uma visita ou pedido ao estabelecimento.</dd></div>
+      <div class="term-row"><dt>Fechamento de Caixa</dt><dd>Conferência dos valores recebidos ao final do expediente, comparando o registrado no sistema com o dinheiro e demais meios de pagamento apurados.</dd></div>
+      <div class="term-row"><dt>Contas a Pagar</dt><dd>Obrigações financeiras do estabelecimento junto a fornecedores, prestadores de serviço e demais credores.</dd></div>
+      <div class="term-row"><dt>Contas a Receber</dt><dd>Valores que o estabelecimento tem a receber de clientes, convênios ou vendas realizadas a prazo.</dd></div>
+      <div class="term-row"><dt>Requisição Interna</dt><dd>Solicitação de insumos feita por um setor do estabelecimento, como a cozinha, ao controle de estoque.</dd></div>
+      <div class="term-row"><dt>Perda de Estoque (Quebra)</dt><dd>Insumos ou produtos que saem do estoque sem gerar venda, por vencimento, dano, erro de manuseio ou furto.</dd></div>
+      <div class="term-row"><dt>Turnover de Mesa</dt><dd>Número de vezes que uma mesa é ocupada por clientes diferentes em um determinado período, indicando a rotatividade do salão.</dd></div>
+      <div class="term-row"><dt>Checkout</dt><dd>Etapa final do pedido online, na qual o cliente confirma os itens do carrinho e efetua o pagamento.</dd></div>
+      <div class="term-row"><dt>Churn</dt><dd>Perda de clientes que deixam de comprar ou de utilizar os serviços do estabelecimento em um período.</dd></div>
+      <div class="term-row"><dt>Taxa de Conversão</dt><dd>Percentual de visitantes do cardápio digital que efetivamente concluem um pedido.</dd></div>
+      <div class="term-row"><dt>Comissão</dt><dd>Valor pago a um colaborador com base no volume ou valor das vendas que ele realizou.</dd></div>
+      <div class="term-row"><dt>Escala de Trabalho</dt><dd>Planejamento dos horários e turnos de cada colaborador ao longo da semana.</dd></div>
+      <div class="term-row"><dt>Perfil de Usuário</dt><dd>Conjunto de permissões que define quais funcionalidades do sistema cada tipo de usuário pode acessar, de acordo com sua função no estabelecimento.</dd></div>
+    </dl>
+  </section>
+
+  <section id="s14">
+    <div class="snum">14</div>
     <h2>Conclusão</h2>
     <p>A Plataforma Integrada de Gestão para Bares e Restaurantes propõe resolver um problema recorrente do setor: a falta de integração entre os processos administrativos e operacionais.</p>
     <p>O escopo definido contempla funcionalidades suficientes para sustentar o desenvolvimento durante todo o ano letivo, envolvendo levantamento de requisitos, modelagem, banco de dados, desenvolvimento web, controle de acesso, integração entre módulos e geração de relatórios gerenciais.</p>
@@ -472,7 +547,7 @@
   </section>
 
   <footer>
-    Documento de Visão e Escopo · Versão 1.0 · Agosto de 2026
+    Documento de Visão e Escopo · Agosto de 2026
     <br><a class="back-to-top" href="#top">Voltar ao início</a>
   </footer>
 
