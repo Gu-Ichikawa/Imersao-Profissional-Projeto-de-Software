@@ -1,75 +1,118 @@
-# React + TypeScript + Vite
+# ZENTRY — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicação web do ZENTRY em **React + TypeScript**, criada com **Vite**, usando **Ant Design** (componentes), **React Router** (navegação) e **Axios** (chamadas à API).
 
-Currently, two official plugins are available:
+## Pré-requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js (versão LTS)
+- Backend rodando em `http://localhost:8080` (ver `backend/README.md`)
 
-## React Compiler
+## Instalar
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+cd frontend
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## Configurar
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Copie o arquivo de exemplo para criar o seu `.env` (ele não vai para o Git):
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
+```
+
+| Variável | Padrão | Para quê |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:8080/api` | endereço da API do backend |
+
+Sem o `.env`, o frontend usa o endereço padrão acima.
+
+## Rodar
+
+```bash
+npm run dev
+```
+
+Abra `http://localhost:5173`. Mantenha essa porta: é a que o backend libera no CORS.
+
+| Comando | O que faz |
+|---|---|
+| `npm run dev` | sobe o site em modo de desenvolvimento |
+| `npm run lint` | confere o código com o ESLint |
+| `npm run build` | compila o projeto (roda o TypeScript); use antes de abrir o PR |
+
+## Estrutura
 
 ```
+src/
+├── main.tsx              → ponto de entrada: React Router + Ant Design (pt-BR e tema do Figma)
+├── App.tsx               → rotas: qual endereço abre qual página
+├── assets/               → imagens (logo)
+├── compartilhado/        → o que todos os módulos usam
+│   ├── layout/           → LayoutPrincipal (menu lateral + área da página)
+│   ├── componentes/      → componentes reutilizáveis (ex.: CabecalhoPagina)
+│   └── servicos/         → api.ts (cliente único da API)
+└── modulos/              → um por módulo do backend
+    ├── cardapio/
+    │   ├── paginas/      → uma página por rota (ex.: PratosPage)
+    │   ├── componentes/  → partes das páginas (formulários, modais)
+    │   └── servicos/     → funções que chamam a API do módulo
+    └── estoque/
+        └── (mesma estrutura)
+```
+
+A organização espelha o backend (monólito modular): um módulo não importa nada de outro módulo; o que é comum fica em `compartilhado`.
+
+## Rotas
+
+| Endereço | Página | Responsável |
+|---|---|---|
+| `/` | redireciona para `/cardapio/pratos` | — |
+| `/cardapio/categorias` | `CategoriasPage` | SCRUM-96 |
+| `/cardapio/pratos` | `PratosPage` | SCRUM-102 (venda: SCRUM-106) |
+| `/cardapio/pratos/:id/ficha-tecnica` | `FichaTecnicaPage` | SCRUM-104 |
+| `/estoque/insumos` | `InsumosPage` | SCRUM-98 |
+| `/estoque/movimentacoes` | `MovimentacoesPage` | SCRUM-100 |
+
+Os módulos Salão, Caixa, Financeiro, Delivery e Usuários aparecem desativados no menu: não fazem parte do protótipo.
+
+## Convenções
+
+### Nomes e arquivos
+
+| O quê | Padrão | Exemplo |
+|---|---|---|
+| Página | `<Nome>Page.tsx` em `modulos/<modulo>/paginas` | `PratosPage.tsx` |
+| Componente | PascalCase em `componentes` | `ModalRegistrarVenda.tsx` |
+| Serviço da API | `<recurso>Servico.ts` em `modulos/<modulo>/servicos` | `pratoServico.ts` |
+| Código | português, sem acento | `buscarPratos`, `precoVenda` |
+
+### Telas
+
+- Toda página começa com o `CabecalhoPagina` (caminho, título e descrição), igual ao Figma.
+- Use os componentes do Ant Design (`Table`, `Form`, `Modal`, `Button`...). Cores, fontes e cantos já vêm do tema no `main.tsx`: evite cores escritas à mão.
+- Botões em formato de pílula: `<Button shape="round">`.
+
+### Chamadas à API
+
+- Sempre use o `api` de `compartilhado/servicos/api.ts` (nunca crie outro `axios`):
+
+```ts
+import api, { type Pagina } from '../../../compartilhado/servicos/api'
+
+export async function listarPratos(pagina: number) {
+  const resposta = await api.get<Pagina<Prato>>('/pratos', { params: { page: pagina - 1 } })
+  return resposta.data
+}
+```
+
+- **Paginação:** o backend conta as páginas a partir de **0** e a tabela do Ant Design a partir de **1** (por isso o `pagina - 1`). Os itens vêm em `content` e o total em `totalElements`.
+- **Erros:** use `mensagemDeErro(erro)` para mostrar a mensagem do backend e `errosDeCampo(erro)` para marcar campos inválidos de um formulário (erro 400). Cada tela decide onde mostrar o erro.
+- Os nomes dos campos no JSON são os mesmos do backend (`precoVenda`, `quantidadeAtual`...), e os enums chegam em MAIÚSCULAS (`UNIDADE`, `BAIXA_POR_VENDA`): mostre um texto legível na tela.
+
+### Git
+
+- Branch por ticket: `SCRUM-<número>-<descricao>`.
+- Commits pequenos: `SCRUM-<número>: o que foi feito`.
+- Antes do PR: `npm run lint` e `npm run build` sem erros, e `git merge origin/main`.
