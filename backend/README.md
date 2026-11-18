@@ -155,6 +155,53 @@ Valores dos enums (iguais ao diagrama de classes do Miro):
 
 Ficam fora desta entrega: `lote`, `complemento`, `prato_complemento`, `promocao`, `promocao_prato`, `historico_preco`, `comanda`, `item_comanda` e as tabelas de equipamentos.
 
+## Dados da demo (V3)
+
+O script `V3__dados_demo.sql` carrega os mesmos dados das telas do Figma:
+
+- 5 categorias do cardápio: Lanches, Porções, Pizzas, Saladas, Sobremesas
+- 5 insumos: Pão brioche, Carne bovina, Queijo cheddar, Alface americana, Molho da casa
+- 6 pratos; só o **Hambúrguer artesanal** tem ficha técnica (custo R$ 8,40, CMV 26,25%)
+- 1 `ENTRADA` por insumo no histórico, feita pelo usuário de demonstração
+
+| Insumo | Unidade | Saldo | Mínimo | Custo unitário | Na ficha do hambúrguer |
+|---|---|---|---|---|---|
+| Pão brioche | `UNIDADE` | 10 | 5 | 1,20 | 1 |
+| Carne bovina | `G` | 2000 | 1000 | 0,038 | 150 |
+| Queijo cheddar | `UNIDADE` | 40 | 10 | 0,45 | 2 |
+| Alface americana | `G` | 500 | 200 | 0,015 | 20 |
+| Molho da casa | `ML` | 1000 | 300 | 0,010 | 30 |
+
+### Conferir os dados no banco
+
+Depois de rodar o backend uma vez, no MySQL Workbench:
+
+```sql
+SELECT nome, unidade_medida, quantidade_atual, estoque_minimo FROM insumo;   -- 5 insumos
+SELECT nome, preco_venda, taxa_cmv FROM prato;                              -- 6 pratos
+SELECT SUM(i.quantidade * ins.custo_unitario) AS custo
+FROM item_ficha_tecnica i JOIN insumo ins ON ins.id = i.insumo_id;          -- 8.40
+SELECT tipo, quantidade FROM movimentacao_estoque;                          -- 5 ENTRADA
+```
+
+### Roteiro da demo (quando as APIs estiverem prontas)
+
+1. Listar insumos: aparecem os 5 insumos com saldo e nível de estoque
+2. Abrir o Hambúrguer artesanal: a ficha técnica mostra 5 insumos e custo **R$ 8,40**
+3. Vender **2** hambúrgueres: a venda passa e o Pão brioche cai de 10 para **8**; o histórico ganha 5 movimentações `BAIXA_POR_VENDA`
+4. Vender **12** hambúrgueres: a API responde 422 `ESTOQUE_INSUFICIENTE` (precisa de 12 pães e há 8) e **nenhum** saldo muda
+5. Vender um prato sem ficha (ex.: Batata frita): a API responde 422 `PRATO_SEM_FICHA`
+
+### Voltar o banco ao estado inicial
+
+Depois de testar, para recomeçar a demo do zero, apague o banco no Workbench e rode o backend de novo (o Flyway recria tudo com V1, V2 e V3):
+
+```sql
+DROP DATABASE zentry;
+```
+
+> Isso apaga **todos** os dados do seu banco local. Não afeta ninguém do grupo.
+
 ## Formato de erro
 
 Toda resposta de erro da API segue este formato:
