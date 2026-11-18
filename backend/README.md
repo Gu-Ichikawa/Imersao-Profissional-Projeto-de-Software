@@ -89,7 +89,8 @@ O Spring converte sozinho `quantidadeAtual` → `quantidade_atual`, então só u
 
 - Dinheiro e quantidades: **`BigDecimal`** (nunca `double`).
 - Data e hora: `LocalDateTime`; só data: `LocalDate`.
-- Enums: `@Enumerated(EnumType.STRING)` (nunca a posição numérica).
+- Enums: `@Enumerated(EnumType.STRING)` **junto com** `@JdbcTypeCode(SqlTypes.VARCHAR)` (as colunas são `VARCHAR`; sem isso o Hibernate espera `ENUM` no MySQL e a aplicação não sobe).
+- Booleanos: `Boolean`/`boolean` no Java ↔ `BIT(1)` no banco.
 - IDs: `Long` com `@GeneratedValue(strategy = GenerationType.IDENTITY)`.
 - Relacionamentos `@ManyToOne` com `fetch = FetchType.LAZY`.
 
@@ -122,6 +123,37 @@ As tabelas são criadas por scripts em `src/main/resources/db/migration`, no pad
 
 - **Nunca edite um script que já foi para a `main`.** Para mudar algo, crie um script novo com o próximo número.
 - O Hibernate está em `ddl-auto=validate`: ele só confere se as entidades batem com as tabelas.
+
+## Decisões do protótipo (divergências do DER)
+
+O banco segue o DER da 3ª entrega (Miro). Diferenças conscientes nesta entrega:
+
+| # | Decisão | Motivo |
+|---|---|---|
+| 1 | **Sem lotes:** o saldo fica em `insumo.quantidade_atual` (coluna a mais). A tabela `lote` não é criada e `movimentacao_estoque.lote_id` fica sempre vazio, sem chave estrangeira | No DER o saldo fica nos lotes, mas só perecíveis têm lote; o saldo dos não perecíveis ficaria sem lugar. Lote/FEFO ficam para uma próxima entrega |
+| 2 | **Ajuste sem aprovação:** `ajuste_estoque.status` nasce `EFETIVADO` e `aprovador_id` fica vazio (o `AGUARDANDO_APROVACAO` fica para quando houver login) | Não há login nem perfis no protótipo |
+| 3 | **Usuário mínimo:** `usuario` só com `id` e `login`, com 1 usuário de demonstração (id = 1, login `demo`) | O módulo Usuários não entra no protótipo, mas `responsavel_id` é obrigatório |
+| 4 | **`comanda_id` sem chave estrangeira** | O módulo Caixa não entra no protótipo |
+| 5 | **Tipos SQL:** `numeric` → `DECIMAL(12,2)` (dinheiro), `DECIMAL(12,3)` (quantidades) e `DECIMAL(12,4)` (`custo_unitario`); `boolean` → `BIT(1)`; `timestamp` → `DATETIME(6)`; enums → `VARCHAR` | `numeric` sem precisão perde casas decimais no MySQL; custo por grama (R$ 0,038/g) precisa de 4 casas; tipos escolhidos para bater com o Hibernate (`ddl-auto=validate`) |
+| 6 | **Venda simulada:** a venda gera movimentações `BAIXA_POR_VENDA` sem comanda (`comanda_id` vazio) | O módulo Caixa ainda não existe |
+
+Valores dos enums (iguais ao diagrama de classes do Miro):
+
+| Enum | Valores | Onde fica |
+|---|---|---|
+| `UnidadeMedida` | `KG, G, L, ML, UNIDADE` | coluna `insumo.unidade_medida` |
+| `TipoMovimentacaoEstoque` | `ENTRADA, RETIRADA, AJUSTE, BAIXA_POR_VENDA` | coluna `movimentacao_estoque.tipo` |
+| `MotivoAjuste` | `PERDA, QUEBRA, VENCIMENTO, ERRO_CONTAGEM` | coluna `ajuste_estoque.motivo` |
+| `StatusAjuste` | `AGUARDANDO_APROVACAO, EFETIVADO, CANCELADO` | coluna `ajuste_estoque.status` |
+| `NivelEstoque` | `SUFICIENTE, ATENCAO, REPOR` | **não é coluna**: calculado por `Insumo.nivelEstoque()` |
+
+**Como cada operação vira registro:**
+- Entrada de mercadoria → `movimentacao_estoque` tipo `ENTRADA`
+- Retirada manual → `movimentacao_estoque` tipo `RETIRADA`
+- Baixa automática por venda → `movimentacao_estoque` tipo `BAIXA_POR_VENDA`
+- Perda, quebra, vencimento ou erro de contagem → `movimentacao_estoque` tipo `AJUSTE` **+** uma linha em `ajuste_estoque` com o `motivo` (RN-EST-07)
+
+Ficam fora desta entrega: `lote`, `complemento`, `prato_complemento`, `promocao`, `promocao_prato`, `historico_preco`, `comanda`, `item_comanda` e as tabelas de equipamentos.
 
 ## Formato de erro
 
