@@ -225,3 +225,83 @@ throw new RegraNegocioException(HttpStatus.UNPROCESSABLE_ENTITY,      // 422
 ```
 
 Erros de validação (`@Valid`) voltam com status 400, código `VALIDACAO` e a lista de `campos` inválidos.
+
+## API
+
+Contrato de cada recurso. Quem cria uma API acrescenta a sua parte aqui, no mesmo PR.
+
+### Insumos (SCRUM-97)
+
+| Método | Rota | O que faz | Resposta |
+|---|---|---|---|
+| `GET` | `/api/insumos?page=0&size=20&nome=pão&ativo=true` | Lista paginada, ordenada por nome (`nome` e `ativo` são opcionais) | 200 `PaginaResponse<InsumoResponse>` |
+| `GET` | `/api/insumos/{id}` | Busca um insumo | 200 `InsumoResponse` |
+| `POST` | `/api/insumos` | Cadastra | 201 `InsumoResponse` |
+| `PUT` | `/api/insumos/{id}` | Edita | 200 `InsumoResponse` |
+| `PATCH` | `/api/insumos/{id}/inativar` | Inativa (não apaga) | 204 |
+| `PATCH` | `/api/insumos/{id}/ativar` | Reativa | 204 |
+| `GET` | `/api/categorias-insumo` | Categorias para o select do formulário (sem paginação) | 200 `[{ "id": 1, "nome": "Carnes" }]` |
+
+**Entrada (`InsumoRequest`, POST e PUT):**
+
+```json
+{
+  "nome": "Pão brioche",
+  "sku": "INS-001",
+  "unidadeMedida": "UNIDADE",
+  "perecivel": true,
+  "estoqueMinimo": 5,
+  "custoUnitario": 1.20,
+  "controlaEstoque": true,
+  "categoriaInsumoId": 1,
+  "quantidadeInicial": 10
+}
+```
+
+- Obrigatórios: `nome` (até 100), `unidadeMedida`, `perecivel`, `estoqueMinimo`, `custoUnitario`, `controlaEstoque`, `categoriaInsumoId`
+- `sku` é opcional (até 50) e único; números não podem ser negativos; `custoUnitario` aceita até 4 casas decimais
+- `quantidadeInicial` vale **só no POST** (vazio = 0). No PUT é ignorada: depois do cadastro o saldo só muda por movimentação (RN-EST-02)
+
+**Saída (`InsumoResponse`):**
+
+```json
+{
+  "id": 1,
+  "nome": "Pão brioche",
+  "sku": "INS-001",
+  "unidadeMedida": "UNIDADE",
+  "perecivel": true,
+  "estoqueMinimo": 5.000,
+  "custoUnitario": 1.2000,
+  "controlaEstoque": true,
+  "ativo": true,
+  "quantidadeAtual": 10.000,
+  "nivelEstoque": "SUFICIENTE",
+  "categoria": { "id": 1, "nome": "Pães e massas" }
+}
+```
+
+**Nível de estoque (RN-EST-03), decidido pelo grupo:** `REPOR` se saldo ≤ mínimo; `ATENCAO` se saldo ≤ 1,5 × mínimo; senão `SUFICIENTE`. Se o insumo não controla estoque, `nivelEstoque` vem `null`.
+
+**Erros:**
+
+| Quando | Status | `codigo` |
+|---|---|---|
+| Campo inválido ou faltando | 400 | `VALIDACAO` (lista em `campos`) |
+| Valor de enum inválido ou JSON malformado | 400 | `CORPO_INVALIDO` |
+| Insumo não existe | 404 | `NAO_ENCONTRADO` |
+| Categoria informada não existe | 422 | `CATEGORIA_NAO_ENCONTRADA` |
+| SKU já usado por outro insumo | 409 | `SKU_JA_CADASTRADO` |
+
+**Contrato interno (para outros tickets):**
+
+- Entidade `Insumo` (usada pela movimentação, SCRUM-99, mesmo módulo):
+  - `aumentarSaldo(quantidade)` e `diminuirSaldo(quantidade)`: a quantidade tem que ser maior que zero (senão 422 `QUANTIDADE_INVALIDA`); `diminuirSaldo` lança 422 `ESTOQUE_INSUFICIENTE` se faltar saldo
+  - `nivelEstoque()`, `inativar()`, `ativar()`
+- `InsumoService.buscarPorId(id)`: devolve a entidade ou lança 404. É o que a ficha técnica (SCRUM-103) e a venda (SCRUM-105) usam
+
+**Regras para a movimentação (SCRUM-99) não quebrar o cadastro:**
+
+1. O `MovimentacaoService` busca o insumo pelo **`InsumoRepository`** (mesmo módulo), **não** pelo `InsumoService`. Se os dois services se chamarem, o Spring acusa dependência circular e a aplicação não sobe
+2. O `MovimentacaoService` deve ter `registrarEntrada(insumo, quantidade)`
+3. Depois que o SCRUM-99 estiver na `main`, o `InsumoService.cadastrar` passa a chamar `registrarEntrada` quando `quantidadeInicial > 0` (ponto marcado no código), dentro da mesma transação. Até lá o cadastro grava o saldo direto
