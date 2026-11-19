@@ -8,6 +8,7 @@ import br.com.zentry.compartilhado.erro.RegraNegocioException;
 import br.com.zentry.estoque.dto.InsumoRequest;
 import br.com.zentry.estoque.dto.InsumoResponse;
 import br.com.zentry.estoque.model.NivelEstoque;
+import br.com.zentry.estoque.model.TipoMovimentacaoEstoque;
 import br.com.zentry.estoque.model.UnidadeMedida;
 import br.com.zentry.estoque.repository.CategoriaInsumoRepository;
 import java.math.BigDecimal;
@@ -26,6 +27,9 @@ class InsumoServiceTest {
 
     @Autowired
     private CategoriaInsumoRepository categoriaInsumoRepository;
+
+    @Autowired
+    private MovimentacaoEstoqueService movimentacaoEstoqueService;
 
     private InsumoRequest request(String nome, String sku, Long categoriaId, String quantidadeInicial) {
         return new InsumoRequest(nome, sku, UnidadeMedida.KG, true, new BigDecimal("2"),
@@ -46,6 +50,18 @@ class InsumoServiceTest {
         assertThat(criado.quantidadeAtual()).isEqualByComparingTo("2.5");
         assertThat(criado.nivelEstoque()).isEqualTo(NivelEstoque.ATENCAO);
         assertThat(criado.categoria().id()).isEqualTo(primeiraCategoria());
+    }
+
+    @Test
+    void cadastroComQuantidadeInicialRegistraUmaEntrada() {
+        InsumoResponse criado = insumoService.cadastrar(request("Bacon teste", null, primeiraCategoria(), "2.5"));
+
+        var historico = movimentacaoEstoqueService.listarPorInsumo(criado.id(), PageRequest.of(0, 20));
+
+        assertThat(historico.content()).singleElement().satisfies(movimentacao -> {
+            assertThat(movimentacao.tipo()).isEqualTo(TipoMovimentacaoEstoque.ENTRADA);
+            assertThat(movimentacao.quantidade()).isEqualByComparingTo("2.5");
+        });
     }
 
     @Test

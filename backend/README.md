@@ -305,7 +305,71 @@ Contrato de cada recurso. Quem cria uma API acrescenta a sua parte aqui, no mesm
 
 1. O `MovimentacaoService` busca o insumo pelo **`InsumoRepository`** (mesmo módulo), **não** pelo `InsumoService`. Se os dois services se chamarem, o Spring acusa dependência circular e a aplicação não sobe
 2. O `MovimentacaoService` deve ter `registrarEntrada(insumo, quantidade)`
-3. Depois que o SCRUM-99 estiver na `main`, o `InsumoService.cadastrar` passa a chamar `registrarEntrada` quando `quantidadeInicial > 0` (ponto marcado no código), dentro da mesma transação. Até lá o cadastro grava o saldo direto
+3. O `InsumoService.cadastrar` chama `registrarEntrada` quando `quantidadeInicial > 0`, dentro da mesma transação (feito no SCRUM-99)
+
+### Movimentações de estoque (SCRUM-99)
+
+UC-EST-001 e UC-EST-003. RF-EST-02, RF-EST-03, RF-EST-05, RF-EST-06, RN-EST-01, RN-EST-02, RN-EST-07.
+
+| Método | Rota | O que faz | Resposta |
+|---|---|---|---|
+| `POST` | `/api/movimentacoes-estoque` | Registra uma entrada ou retirada | 201 `MovimentacaoEstoqueResponse` |
+| `POST` | `/api/movimentacoes-estoque/ajustes` | Ajuste pela contagem física (perda, quebra, vencimento, erro de contagem) | 201 `MovimentacaoEstoqueResponse` |
+| `GET` | `/api/movimentacoes-estoque/insumos/{insumoId}?page=0&size=20` | Histórico do insumo, paginado, do mais recente para o mais antigo | 200 `PaginaResponse<MovimentacaoEstoqueResponse>` |
+
+**Entrada ou retirada (`MovimentacaoEstoqueRequest`):**
+
+```json
+{ "insumoId": 1, "tipo": "ENTRADA", "quantidade": 5 }
+```
+
+- `tipo` aceita só `ENTRADA` (soma ao saldo) ou `RETIRADA` (subtrai). `AJUSTE` tem rota própria e `BAIXA_POR_VENDA` só é gerado pela venda
+- `quantidade` é obrigatória, maior que zero, com até 3 casas decimais
+
+**Ajuste (`AjusteEstoqueRequest`):**
+
+```json
+{ "insumoId": 1, "quantidadeContada": 8, "motivo": "PERDA" }
+```
+
+- Informa a **contagem física**; o saldo do insumo passa a ser exatamente essa quantidade, para mais ou para menos
+- `motivo` é obrigatório (RN-EST-07): `PERDA`, `QUEBRA`, `VENCIMENTO` ou `ERRO_CONTAGEM`
+- Grava uma movimentação `AJUSTE` com o tamanho da diferença e uma linha em `ajuste_estoque` com `saldoSistema`, `quantidadeContada`, `diferenca` (com sinal), `motivo` e status `EFETIVADO`
+- Exemplo: havia 10 pães e 2 estragaram → contagem 8, motivo `PERDA` → movimentação `AJUSTE` de 2, `diferenca` -2, saldo 8
+
+**Saída (`MovimentacaoEstoqueResponse`):**
+
+```json
+{
+  "id": 7,
+  "tipo": "AJUSTE",
+  "quantidade": 2.000,
+  "dataHora": "2026-11-19T15:30:00.123456",
+  "motivo": "PERDA"
+}
+```
+
+`motivo` só vem preenchido quando o tipo é `AJUSTE`. O responsável é sempre o usuário de demonstração (id 1).
+
+**Erros:**
+
+| Quando | Status | `codigo` |
+|---|---|---|
+| Campo inválido ou faltando (inclusive ajuste sem motivo) | 400 | `VALIDACAO` (lista em `campos`) |
+| Valor de enum inválido ou JSON malformado | 400 | `CORPO_INVALIDO` |
+| Tipo `AJUSTE` ou `BAIXA_POR_VENDA` na rota de entrada/retirada | 422 | `TIPO_INVALIDO` |
+| Insumo informado no corpo não existe | 422 | `INSUMO_NAO_ENCONTRADO` |
+| Insumo do histórico não existe | 404 | `NAO_ENCONTRADO` |
+| Retirada ou ajuste que deixaria o saldo negativo | 422 | `ESTOQUE_INSUFICIENTE` |
+| Contagem igual ao saldo do sistema (ajuste sem diferença) | 422 | `QUANTIDADE_INVALIDA` |
+
+**Contrato interno (para outros tickets):**
+
+- `MovimentacaoEstoqueService.registrarEntrada(insumo, quantidade)`: soma ao saldo e grava `ENTRADA`. Usado pelo cadastro de insumo
+- `MovimentacaoEstoqueService.registrarBaixa(insumo, quantidade)`: subtrai do saldo e grava `BAIXA_POR_VENDA`; lança 422 `ESTOQUE_INSUFICIENTE` se faltar saldo. É o que a venda (SCRUM-105) usa
+- `UsuarioService.buscarPorId(id)` (pacote `usuario`): só o mínimo para gravar o responsável
+
+**Pendente de decisão do grupo:** os docs não dizem se insumo **inativo** ou que **não controla estoque** pode ser movimentado. Por enquanto a API permite os dois.
 
 ### Pratos (SCRUM-101)
 

@@ -21,6 +21,7 @@ public class InsumoService {
 
     private final InsumoRepository insumoRepository;
     private final CategoriaInsumoRepository categoriaInsumoRepository;
+    private final MovimentacaoEstoqueService movimentacaoEstoqueService;
 
     @Transactional(readOnly = true)
     public PaginaResponse<InsumoResponse> listar(String nome, Boolean ativo, Pageable pageable) {
@@ -48,9 +49,13 @@ public class InsumoService {
                 request.custoUnitario(),
                 request.controlaEstoque(),
                 buscarCategoria(request.categoriaInsumoId()),
-                request.quantidadeInicial());
-        // TODO SCRUM-99: registrar uma ENTRADA com a quantidade inicial
-        return InsumoResponse.de(insumoRepository.save(insumo));
+                null);
+        insumoRepository.save(insumo);
+        // O saldo inicial entra como movimentação, para ficar no histórico (RN-EST-02)
+        if (request.quantidadeInicial() != null && request.quantidadeInicial().signum() > 0) {
+            movimentacaoEstoqueService.registrarEntrada(insumo, request.quantidadeInicial());
+        }
+        return InsumoResponse.de(insumo);
     }
 
     @Transactional
