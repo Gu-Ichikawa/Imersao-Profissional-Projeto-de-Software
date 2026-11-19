@@ -409,7 +409,7 @@ Não há `DELETE`: pela RN-CAR-001 só se exclui prato sem pedidos, e no protót
   "descricao": "Pão brioche, 150 g de carne, cheddar, alface e molho da casa",
   "precoVenda": 32.00,
   "ativo": true,
-  "categoria": { "id": 1, "nome": "Lanches" }
+  "categoria": { "id": 1, "nome": "Lanches", "ativa": true }
 }
 ```
 
@@ -427,7 +427,47 @@ Não há `DELETE`: pela RN-CAR-001 só se exclui prato sem pedidos, e no protót
 
 - `PratoService.buscarPorId(id)`: devolve a entidade `Prato` ou lança 404. É o que a ficha técnica (SCRUM-103) e a venda (SCRUM-105) usam
 - Entidade `Prato`: `getAtivo()`, `inativar()`, `ativar()`. A venda deve recusar prato inativo
-- `CategoriaCardapio` e `CategoriaCardapioRepository` foram criados aqui só com o mínimo que o prato precisa. O CRUD da categoria (DTO de entrada, service, controller e a rota `/api/categorias-cardapio`) é do **SCRUM-95**, que usa essa mesma entidade em vez de criar outra
+- `CategoriaCardapio` e `CategoriaCardapioRepository` foram criados aqui só com o mínimo que o prato precisa. O CRUD da categoria é do **SCRUM-95** (seção abaixo), que usa essa mesma entidade
+
+### Categorias do cardápio (SCRUM-95)
+
+UC-CAR-002. RF-CAR-006 a RF-CAR-009, RN-CAR-002.
+
+| Método | Rota | O que faz | Resposta |
+|---|---|---|---|
+| `GET` | `/api/categorias-cardapio?page=0&size=20` | Lista paginada, ordenada por nome | 200 `PaginaResponse<CategoriaCardapioResponse>` |
+| `GET` | `/api/categorias-cardapio/{id}` | Busca uma categoria | 200 `CategoriaCardapioResponse` |
+| `POST` | `/api/categorias-cardapio` | Cadastra (a categoria nasce ativa) | 201 `CategoriaCardapioResponse` |
+| `PUT` | `/api/categorias-cardapio/{id}` | Edita o nome (não muda o status) | 200 `CategoriaCardapioResponse` |
+| `PATCH` | `/api/categorias-cardapio/{id}/inativar` | Inativa, RF-CAR-008 | 204 |
+| `PATCH` | `/api/categorias-cardapio/{id}/ativar` | Reativa | 204 |
+| `DELETE` | `/api/categorias-cardapio/{id}` | Exclui definitivamente, só sem prato vinculado (RF-CAR-009, RN-CAR-002) | 204 |
+
+**Entrada (`CategoriaCardapioRequest`, POST e PUT):**
+
+```json
+{ "nome": "Bebidas" }
+```
+
+- `nome` é obrigatório (até 100) e único. A comparação segue o banco, que não diferencia maiúsculas nem acentos ("lanches" bate com "Lanches")
+
+**Saída (`CategoriaCardapioResponse`):**
+
+```json
+{ "id": 1, "nome": "Lanches", "ativa": true }
+```
+
+O mesmo formato aparece no campo `categoria` do `PratoResponse`.
+
+**Erros:**
+
+| Quando | Status | `codigo` |
+|---|---|---|
+| Nome vazio ou com mais de 100 caracteres | 400 | `VALIDACAO` (lista em `campos`) |
+| JSON malformado | 400 | `CORPO_INVALIDO` |
+| Categoria não existe | 404 | `NAO_ENCONTRADO` |
+| Nome já usado por outra categoria | 409 | `CATEGORIA_JA_CADASTRADA` |
+| Exclusão de categoria com prato vinculado | 409 | `CATEGORIA_COM_PRATOS` |
 
 ### Venda e baixa de estoque (SCRUM-105)
 

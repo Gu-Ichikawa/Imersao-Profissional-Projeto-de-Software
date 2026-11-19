@@ -19,4 +19,7 @@ public interface PratoRepository extends JpaRepository<Prato, Long> {
             """)
     Page<Prato> buscar(@Param("nome") String nome, @Param("categoriaId") Long categoriaId,
                        @Param("ativo") Boolean ativo, Pageable pageable);
+
+    // RN-CAR-002: categoria com prato vinculado não pode ser excluída
+    boolean existsByCategoriaId(Long categoriaId);
 }

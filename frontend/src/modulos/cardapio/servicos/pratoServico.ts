@@ -1,4 +1,3 @@
-import axios from 'axios'
 import api, { type Pagina } from '../../../compartilhado/servicos/api'
 
 // Formatos iguais aos DTOs do backend (SCRUM-101)
@@ -55,19 +54,10 @@ export async function ativarPrato(id: number) {
   await api.patch(`/pratos/${id}/ativar`)
 }
 
-// Categorias para os selects. A rota /categorias-cardapio é do SCRUM-95.
-// Enquanto ela não existir, o backend responde com erro (hoje 500, pelo tratador genérico)
-// e as categorias são montadas a partir dos pratos cadastrados.
+// Categorias para os selects (API de categoria, SCRUM-95). Até 50, o máximo por página da API
 export async function listarCategorias(): Promise<CategoriaCardapio[]> {
-  try {
-    const resposta = await api.get<CategoriaCardapio[]>('/categorias-cardapio')
-    return resposta.data
-  } catch (erro) {
-    if (axios.isAxiosError(erro) && erro.response) {
-      const pratos = await listarPratos({}, 1, 50)
-      const porId = new Map(pratos.content.map((prato) => [prato.categoria.id, prato.categoria]))
-      return [...porId.values()].sort((a, b) => a.nome.localeCompare(b.nome))
-    }
-    throw erro
-  }
+  const resposta = await api.get<Pagina<CategoriaCardapio>>('/categorias-cardapio', {
+    params: { size: 50, sort: 'nome' },
+  })
+  return resposta.data.content
 }
