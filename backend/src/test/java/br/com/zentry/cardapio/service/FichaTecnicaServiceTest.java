@@ -46,8 +46,9 @@ class FichaTecnicaServiceTest {
 
     @Test
     void criaFichaVaziaQuandoOPratoAindaNaoTem() {
+        Prato prato = prato();
         when(fichaTecnicaRepository.findByPratoId(1L)).thenReturn(Optional.empty());
-        when(pratoService.buscarPorId(1L)).thenReturn(prato());
+        when(pratoService.buscarPorId(1L)).thenReturn(prato);
         when(fichaTecnicaRepository.save(any(FichaTecnica.class))).thenAnswer(i -> i.getArgument(0));
 
         var resposta = service.buscarOuCriar(1L);
@@ -59,7 +60,8 @@ class FichaTecnicaServiceTest {
 
     @Test
     void naoCriaOutraFichaQuandoJaExiste() {
-        when(fichaTecnicaRepository.findByPratoId(1L)).thenReturn(Optional.of(new FichaTecnica(prato())));
+        FichaTecnica ficha = new FichaTecnica(prato());
+        when(fichaTecnicaRepository.findByPratoId(1L)).thenReturn(Optional.of(ficha));
 
         service.buscarOuCriar(1L);
 
@@ -72,7 +74,8 @@ class FichaTecnicaServiceTest {
         when(pao.getId()).thenReturn(7L);
         when(pao.getNome()).thenReturn("Pão brioche");
         when(pao.getCustoUnitario()).thenReturn(new BigDecimal("1.2000"));
-        when(fichaTecnicaRepository.findByPratoId(1L)).thenReturn(Optional.of(new FichaTecnica(prato())));
+        FichaTecnica ficha = new FichaTecnica(prato());
+        when(fichaTecnicaRepository.findByPratoId(1L)).thenReturn(Optional.of(ficha));
         when(insumoService.buscarPorId(7L)).thenReturn(pao);
 
         var resposta = service.adicionarItem(1L, new ItemFichaRequest(7L, new BigDecimal("2")));
