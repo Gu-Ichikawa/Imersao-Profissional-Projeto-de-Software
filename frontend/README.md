@@ -111,8 +111,55 @@ export async function listarPratos(pagina: number) {
 - **Erros:** use `mensagemDeErro(erro)` para mostrar a mensagem do backend e `errosDeCampo(erro)` para marcar campos inválidos de um formulário (erro 400). Cada tela decide onde mostrar o erro.
 - Os nomes dos campos no JSON são os mesmos do backend (`precoVenda`, `quantidadeAtual`...), e os enums chegam em MAIÚSCULAS (`UNIDADE`, `BAIXA_POR_VENDA`): mostre um texto legível na tela.
 
+### Formatadores
+
+Use sempre `compartilhado/formatadores.ts` (não crie outro):
+
+| Função | Exemplo |
+|---|---|
+| `moeda(32)` | `R$ 32,00` |
+| `moedaUnitaria(0.038)` | `R$ 0,0380` (custo de insumo: 4 casas só quando precisa) |
+| `rotuloUnidade('UNIDADE')` | `un` (KG → kg, G → g, L → L, ML → ml) |
+
+Erro geral de um modal fica no topo dele: fundo `#FBEAEA`, texto `#8E2B20`, cantos 10.
+
 ### Git
 
 - Branch por ticket: `SCRUM-<número>-<descricao>`.
 - Commits pequenos: `SCRUM-<número>: o que foi feito`.
 - Antes do PR: `npm run lint` e `npm run build` sem erros, e `git merge origin/main`.
+
+## Telas que aguardam API
+
+O código destas telas já está no lugar, mas elas só funcionam quando a API correspondente existir.
+As rotas abaixo são as que o frontend espera: quem fizer a API, confirme ou ajuste aqui e no serviço.
+
+**Ficha técnica (SCRUM-104 → depende da SCRUM-103)**, em `cardapio/servicos/fichaTecnicaServico.ts`.
+Cada rota devolve a ficha inteira, com o custo recalculado:
+
+| Método | Rota | Corpo |
+|---|---|---|
+| `GET` | `/pratos/{id}/ficha-tecnica` | — |
+| `POST` | `/pratos/{id}/ficha-tecnica/itens` | `{ insumoId, quantidade }` |
+| `PUT` | `/pratos/{id}/ficha-tecnica/itens/{itemId}` | `{ quantidade }` |
+| `DELETE` | `/pratos/{id}/ficha-tecnica/itens/{itemId}` | — |
+
+**Registrar venda (SCRUM-106 → depende da SCRUM-105)**, em `cardapio/servicos/vendaServico.ts`:
+`POST /pratos/{id}/vendas` com `{ quantidade }`. Erros esperados: 422 `ESTOQUE_INSUFICIENTE`, `PRATO_INATIVO` e `PRATO_SEM_FICHA`.
+
+**Ligar o botão "Vender" na `PratosPage` (SCRUM-102):** o modal já existe em `cardapio/componentes/ModalRegistrarVenda.tsx`.
+
+```tsx
+import ModalRegistrarVenda, { type PratoParaVenda } from '../componentes/ModalRegistrarVenda'
+
+const [pratoVenda, setPratoVenda] = useState<PratoParaVenda | null>(null)
+
+// na coluna Ações da tabela:
+<Button shape="round" type="primary" disabled={!prato.ativo}
+  onClick={() => setPratoVenda({ id: prato.id, nome: prato.nome, precoVenda: prato.precoVenda })}>
+  Vender
+</Button>
+
+// no fim da página:
+<ModalRegistrarVenda prato={pratoVenda} onFechar={() => setPratoVenda(null)} />
+```
