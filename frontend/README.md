@@ -129,37 +129,15 @@ Erro geral de um modal fica no topo dele: fundo `#FBEAEA`, texto `#8E2B20`, cant
 - Commits pequenos: `SCRUM-<número>: o que foi feito`.
 - Antes do PR: `npm run lint` e `npm run build` sem erros, e `git merge origin/main`.
 
-## Telas que aguardam API
+## Telas e rotas da API
 
-O código destas telas já está no lugar, mas elas só funcionam quando a API correspondente existir.
-As rotas abaixo são as que o frontend espera: quem fizer a API, confirme ou ajuste aqui e no serviço.
+Todas as telas já estão ligadas ao backend. O contrato completo de cada rota está em `backend/README.md`.
 
-**Ficha técnica (SCRUM-104 → depende da SCRUM-103)**, em `cardapio/servicos/fichaTecnicaServico.ts`.
-Cada rota devolve a ficha inteira, com o custo recalculado:
-
-| Método | Rota | Corpo |
+| Tela | Serviço | Rotas da API |
 |---|---|---|
-| `GET` | `/pratos/{id}/ficha-tecnica` | — |
-| `POST` | `/pratos/{id}/ficha-tecnica/itens` | `{ insumoId, quantidade }` |
-| `PUT` | `/pratos/{id}/ficha-tecnica/itens/{itemId}` | `{ quantidade }` |
-| `DELETE` | `/pratos/{id}/ficha-tecnica/itens/{itemId}` | — |
-
-**Registrar venda (SCRUM-106 → depende da SCRUM-105)**, em `cardapio/servicos/vendaServico.ts`:
-`POST /pratos/{id}/vendas` com `{ quantidade }`. Erros esperados: 422 `ESTOQUE_INSUFICIENTE`, `PRATO_INATIVO` e `PRATO_SEM_FICHA`.
-
-**Ligar o botão "Vender" na `PratosPage` (SCRUM-102):** o modal já existe em `cardapio/componentes/ModalRegistrarVenda.tsx`.
-
-```tsx
-import ModalRegistrarVenda, { type PratoParaVenda } from '../componentes/ModalRegistrarVenda'
-
-const [pratoVenda, setPratoVenda] = useState<PratoParaVenda | null>(null)
-
-// na coluna Ações da tabela:
-<Button shape="round" type="primary" disabled={!prato.ativo}
-  onClick={() => setPratoVenda({ id: prato.id, nome: prato.nome, precoVenda: prato.precoVenda })}>
-  Vender
-</Button>
-
-// no fim da página:
-<ModalRegistrarVenda prato={pratoVenda} onFechar={() => setPratoVenda(null)} />
-```
+| Categorias (SCRUM-96) | `cardapio/servicos/categoriaServico.ts` | `/categorias-cardapio` |
+| Pratos (SCRUM-102) | `cardapio/servicos/pratoServico.ts` | `/pratos` |
+| Ficha técnica (SCRUM-104) | `cardapio/servicos/fichaTecnicaServico.ts` | `/pratos/{id}/ficha-tecnica` e `/pratos/{id}/ficha-tecnica/itens` |
+| Registrar venda (SCRUM-106, modal aberto pelo botão "Vender" da tela de pratos) | `cardapio/servicos/vendaServico.ts` | `POST /pratos/{id}/vendas` |
+| Insumos (SCRUM-98) | `estoque/servicos/insumoServico.ts` | `/insumos` |
+| Movimentações (SCRUM-100) | `estoque/servicos/movimentacaoServico.ts` | `/movimentacoes-estoque` |
