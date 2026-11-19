@@ -10,8 +10,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// Entidade mínima criada no SCRUM-101 porque o Prato depende dela.
-// O CRUD completo da categoria (dto, service, controller) é do SCRUM-95.
+// Criada no SCRUM-101 porque o Prato depende dela; o CRUD é do SCRUM-95
 @Entity
 @Table(name = "categoria_cardapio")
 @Getter
@@ -27,4 +26,21 @@ public class CategoriaCardapio {
 
     @Column(nullable = false)
     private Boolean ativa;
+
+    public CategoriaCardapio(String nome) {
+        atualizar(nome);
+        this.ativa = true;
+    }
+
+    public void atualizar(String nome) {
+        this.nome = nome;
+    }
+
+    public void inativar() {
+        this.ativa = false;
+    }
+
+    public void ativar() {
+        this.ativa = true;
+    }
 }
