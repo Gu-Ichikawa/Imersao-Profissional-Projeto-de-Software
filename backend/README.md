@@ -305,3 +305,61 @@ Contrato de cada recurso. Quem cria uma API acrescenta a sua parte aqui, no mesm
 1. O `MovimentacaoService` busca o insumo pelo **`InsumoRepository`** (mesmo módulo), **não** pelo `InsumoService`. Se os dois services se chamarem, o Spring acusa dependência circular e a aplicação não sobe
 2. O `MovimentacaoService` deve ter `registrarEntrada(insumo, quantidade)`
 3. Depois que o SCRUM-99 estiver na `main`, o `InsumoService.cadastrar` passa a chamar `registrarEntrada` quando `quantidadeInicial > 0` (ponto marcado no código), dentro da mesma transação. Até lá o cadastro grava o saldo direto
+
+### Pratos (SCRUM-101)
+
+| Método | Rota | O que faz | Resposta |
+|---|---|---|---|
+| `GET` | `/api/pratos?page=0&size=20&nome=hamb&categoriaId=1&ativo=true` | Lista paginada, ordenada por nome (`nome`, `categoriaId` e `ativo` são opcionais) | 200 `PaginaResponse<PratoResponse>` |
+| `GET` | `/api/pratos/{id}` | Busca um prato | 200 `PratoResponse` |
+| `POST` | `/api/pratos` | Cadastra (o prato nasce ativo) | 201 `PratoResponse` |
+| `PUT` | `/api/pratos/{id}` | Edita (não muda o status) | 200 `PratoResponse` |
+| `PATCH` | `/api/pratos/{id}/inativar` | Inativa (não apaga), RF-CAR-003 | 204 |
+| `PATCH` | `/api/pratos/{id}/ativar` | Reativa | 204 |
+
+Não há `DELETE`: pela RN-CAR-001 só se exclui prato sem pedidos, e no protótipo o prato é apenas inativado.
+
+**Entrada (`PratoRequest`, POST e PUT):**
+
+```json
+{
+  "nome": "Hambúrguer artesanal",
+  "descricao": "Pão brioche, 150 g de carne, cheddar, alface e molho da casa",
+  "precoVenda": 32.00,
+  "categoriaCardapioId": 1
+}
+```
+
+- Obrigatórios: `nome` (até 100), `precoVenda` (≥ 0, até 2 casas decimais) e `categoriaCardapioId`
+- `descricao` é opcional (até 500); texto em branco vira `null`
+- A categoria precisa existir **e estar ativa** (decisão do grupo: prato novo ou editado não entra em categoria inativa)
+- `taxa_cmv` e `imagem_url` existem na tabela, mas ficam fora desta entrega e não aparecem na API
+
+**Saída (`PratoResponse`):**
+
+```json
+{
+  "id": 1,
+  "nome": "Hambúrguer artesanal",
+  "descricao": "Pão brioche, 150 g de carne, cheddar, alface e molho da casa",
+  "precoVenda": 32.00,
+  "ativo": true,
+  "categoria": { "id": 1, "nome": "Lanches" }
+}
+```
+
+**Erros:**
+
+| Quando | Status | `codigo` |
+|---|---|---|
+| Campo inválido ou faltando | 400 | `VALIDACAO` (lista em `campos`) |
+| JSON malformado | 400 | `CORPO_INVALIDO` |
+| Prato não existe | 404 | `NAO_ENCONTRADO` |
+| Categoria informada não existe | 422 | `CATEGORIA_NAO_ENCONTRADA` |
+| Categoria informada está inativa | 422 | `CATEGORIA_INATIVA` |
+
+**Contrato interno (para outros tickets):**
+
+- `PratoService.buscarPorId(id)`: devolve a entidade `Prato` ou lança 404. É o que a ficha técnica (SCRUM-103) e a venda (SCRUM-105) usam
+- Entidade `Prato`: `getAtivo()`, `inativar()`, `ativar()`. A venda deve recusar prato inativo
+- `CategoriaCardapio` e `CategoriaCardapioRepository` foram criados aqui só com o mínimo que o prato precisa. O CRUD da categoria (DTO de entrada, service, controller e a rota `/api/categorias-cardapio`) é do **SCRUM-95**, que usa essa mesma entidade em vez de criar outra
