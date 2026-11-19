@@ -6,6 +6,8 @@ import { MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import CabecalhoPagina from '../../../compartilhado/componentes/CabecalhoPagina'
 import { mensagemDeErro } from '../../../compartilhado/servicos/api'
 import ModalPrato from '../componentes/ModalPrato'
+import ModalRegistrarVenda from '../componentes/ModalRegistrarVenda'
+import type { PratoParaVenda } from '../componentes/ModalRegistrarVenda'
 import { ativarPrato, inativarPrato, listarCategorias, listarPratos } from '../servicos/pratoServico'
 import type { CategoriaCardapio, FiltrosPrato, Prato } from '../servicos/pratoServico'
 
@@ -27,6 +29,7 @@ function PratosPage() {
 
   const [modalAberto, setModalAberto] = useState(false)
   const [pratoEmEdicao, setPratoEmEdicao] = useState<Prato | null>(null)
+  const [pratoVenda, setPratoVenda] = useState<PratoParaVenda | null>(null)
 
   // Incrementar este contador força a tabela a buscar os pratos de novo
   const [recarga, setRecarga] = useState(0)
@@ -159,9 +162,13 @@ function PratosPage() {
           <Button shape="round" onClick={() => navigate(`/cardapio/pratos/${prato.id}/ficha-tecnica`)}>
             Ficha técnica
           </Button>
-          {/* O modal de venda é do SCRUM-106: este botão será ligado a ele quando estiver na main */}
-          <Tooltip title={prato.ativo ? 'Registrar venda (em breve)' : 'Prato inativo não pode ser vendido'}>
-            <Button shape="round" type="primary" disabled>
+          <Tooltip title={prato.ativo ? '' : 'Prato inativo não pode ser vendido'}>
+            <Button
+              shape="round"
+              type="primary"
+              disabled={!prato.ativo}
+              onClick={() => setPratoVenda({ id: prato.id, nome: prato.nome, precoVenda: prato.precoVenda })}
+            >
               Vender
             </Button>
           </Tooltip>
@@ -257,6 +264,8 @@ function PratosPage() {
         onFechar={() => setModalAberto(false)}
         onSalvo={aoSalvar}
       />
+
+      <ModalRegistrarVenda prato={pratoVenda} onFechar={() => setPratoVenda(null)} />
     </>
   )
 }
