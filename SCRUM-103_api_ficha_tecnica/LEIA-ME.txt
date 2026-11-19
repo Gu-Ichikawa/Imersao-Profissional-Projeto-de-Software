@@ -1,0 +1,44 @@
+SCRUM-103 - API de ficha tecnica e custo do prato
+===================================================
+
+ONDE COLOCAR
+Copie a pasta "backend/src" por cima do "backend/src" do repositorio (so adiciona arquivos novos,
+nao altera nenhum existente). Sao 9 arquivos em br/com/zentry/cardapio:
+  model/      FichaTecnica, ItemFichaTecnica
+  repository/ FichaTecnicaRepository
+  service/    FichaTecnicaService
+  controller/ FichaTecnicaController
+  dto/        ItemFichaRequest, QuantidadeItemRequest, ItemFichaResponse, FichaTecnicaResponse
+  + 2 testes em src/test (FichaTecnicaTest, FichaTecnicaServiceTest)
+
+DEPENDE DA SCRUM-101 (API de prato, Gustavo I.)
+O codigo assume, seguindo o mesmo padrao do Insumo:
+  - entidade br.com.zentry.cardapio.model.Prato com getId(), getNome(), getPrecoVenda(), getCategoria()
+  - Prato.getCategoria() devolve CategoriaCardapio com getNome()
+  - br.com.zentry.cardapio.service.PratoService.buscarPorId(Long) devolvendo Prato (404 se nao existir)
+Se os nomes da 101 forem diferentes, ajustar so em FichaTecnicaResponse e FichaTecnicaService.
+Atencao: se o PratoService chamar o FichaTecnicaService, da dependencia circular (ver README, regra do Insumo).
+
+ROTAS (batem com o front da SCRUM-104)
+  GET    /api/pratos/{pratoId}/ficha-tecnica             busca (cria vazia se nao existir)
+  POST   /api/pratos/{pratoId}/ficha-tecnica/itens       adiciona item  -> 201
+  PUT    /api/pratos/{pratoId}/ficha-tecnica/itens/{id}  altera quantidade
+  DELETE /api/pratos/{pratoId}/ficha-tecnica/itens/{id}  remove item -> 200 com a ficha (nao 204,
+         porque a tela precisa do custo total novo; combinar com o grupo)
+Todas devolvem a ficha completa.
+
+ERROS
+  400 VALIDACAO (quantidade vazia, <= 0 ou com mais de 3 casas)
+  404 NAO_ENCONTRADO (prato, insumo ou item inexistente)
+  409 INSUMO_JA_NA_FICHA
+  422 QUANTIDADE_INVALIDA
+
+PARA A SCRUM-105 (venda)
+  FichaTecnicaService.listarItensDoPrato(pratoId) -> List<ItemFichaTecnica> (insumo + quantidade).
+  Lista vazia = prato sem ficha ou ficha sem itens (PRATO_SEM_FICHA). Chamar dentro de @Transactional.
+
+STATUS DOS TESTES
+Escritos mas NAO executados: o ambiente onde foram feitos nao acessa o Maven Central.
+Rodar antes do PR:  cd backend && ./mvnw test
+Os testes novos usam Mockito (nao precisam do MySQL). O custo da demo (R$ 8,40 do hamburguer) esta
+em FichaTecnicaTest.custoDoHamburguerBateComADemo.
