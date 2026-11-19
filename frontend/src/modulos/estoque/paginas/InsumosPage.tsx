@@ -100,23 +100,16 @@ function InsumosPage() {
     <div>
       {contextoAvisos}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 24 }}>
-        <CabecalhoPagina
-          caminho="Estoque / Insumos"
-          titulo="Insumos"
-          descricao="Cadastre, edite e inative insumos e acompanhe o saldo e o nível de estoque."
-        />
-        <Button
-          type="primary"
-          shape="round"
-          size="large"
-          icon={<PlusOutlined />}
-          onClick={() => setModalInsumo({ insumo: null })}
-          style={{ marginBottom: 28 }}
-        >
-          Novo insumo
-        </Button>
-      </div>
+      <CabecalhoPagina
+        caminho="Estoque / Insumos"
+        titulo="Insumos"
+        descricao="Cadastre, edite e inative insumos e acompanhe o saldo e o nível de estoque."
+        acao={
+          <Button type="primary" shape="round" size="large" icon={<PlusOutlined />} onClick={() => setModalInsumo({ insumo: null })}>
+            Novo insumo
+          </Button>
+        }
+      />
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 28 }}>
         <Input

@@ -8,6 +8,10 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,6 +44,14 @@ public class TratadorGlobalDeErros {
 	public ResponseEntity<ErroResponse> corpoInvalido(HttpMessageNotReadableException ex) {
 		return ResponseEntity.badRequest()
 				.body(ErroResponse.de(400, "CORPO_INVALIDO", "O corpo da requisição está inválido ou mal formatado."));
+	}
+
+	// Rota que não existe na API (ex.: GET /api/rota-errada): 404 em vez de erro interno
+	@ExceptionHandler({ NoResourceFoundException.class, NoHandlerFoundException.class })
+	public ResponseEntity<ErroResponse> rotaNaoEncontrada(HttpServletRequest requisicao) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(ErroResponse.de(404, "ROTA_NAO_ENCONTRADA",
+						"A rota " + requisicao.getMethod() + " " + requisicao.getRequestURI() + " não existe."));
 	}
 
 	@ExceptionHandler(Exception.class)
