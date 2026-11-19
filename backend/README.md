@@ -428,3 +428,53 @@ Não há `DELETE`: pela RN-CAR-001 só se exclui prato sem pedidos, e no protót
 - `PratoService.buscarPorId(id)`: devolve a entidade `Prato` ou lança 404. É o que a ficha técnica (SCRUM-103) e a venda (SCRUM-105) usam
 - Entidade `Prato`: `getAtivo()`, `inativar()`, `ativar()`. A venda deve recusar prato inativo
 - `CategoriaCardapio` e `CategoriaCardapioRepository` foram criados aqui só com o mínimo que o prato precisa. O CRUD da categoria (DTO de entrada, service, controller e a rota `/api/categorias-cardapio`) é do **SCRUM-95**, que usa essa mesma entidade em vez de criar outra
+
+### Venda e baixa de estoque (SCRUM-105)
+
+| Método | Rota | O que faz | Resposta |
+|---|---|---|---|
+| `POST` | `/api/pratos/{pratoId}/vendas` | Registra a venda de N unidades e dá baixa nos insumos da ficha técnica (UC-CAR-006) | 201 `VendaResponse` |
+
+Venda simulada: não existe tabela de venda nem comanda. Cada insumo baixado vira uma movimentação `BAIXA_POR_VENDA` (com `comanda_id` vazio e o usuário de demonstração id 1). Quando o Caixa existir, ele chama o mesmo `VendaService.registrarVenda` ao fechar a comanda.
+
+**Entrada (`VendaRequest`):**
+
+```json
+{ "quantidade": 2 }
+```
+
+- `quantidade` obrigatória, de 1 a 999
+
+**Saída (`VendaResponse`), vendendo 2 Hambúrgueres artesanais com os dados do V3:**
+
+```json
+{
+  "pratoId": 1,
+  "prato": "Hambúrguer artesanal",
+  "quantidade": 2,
+  "baixas": [
+    { "insumoId": 1, "insumo": "Pão brioche", "unidadeMedida": "UNIDADE", "quantidadeBaixada": 2, "saldoAtual": 8 },
+    { "insumoId": 2, "insumo": "Carne bovina", "unidadeMedida": "G", "quantidadeBaixada": 300, "saldoAtual": 1700 }
+  ]
+}
+```
+
+(lista resumida; a venda real traz os 5 insumos da ficha)
+
+**Regras:**
+
+- Para cada item da ficha, baixa `quantidade do item × quantidade vendida`, na unidade do insumo
+- Insumo com `controlaEstoque = false` é pulado e não aparece em `baixas` (RN-CAR-006)
+- Tudo numa transação: se faltar saldo de **qualquer** insumo, a venda inteira é recusada e nada é baixado (RNF-CAR-005). A mensagem lista todos os insumos sem saldo
+
+**Erros:**
+
+| Quando | Status | `codigo` |
+|---|---|---|
+| `quantidade` faltando, zero, negativa ou acima de 999 | 400 | `VALIDACAO` |
+| Prato não existe | 404 | `NAO_ENCONTRADO` |
+| Prato inativo | 422 | `PRATO_INATIVO` |
+| Prato sem ficha técnica (ou ficha vazia) | 422 | `PRATO_SEM_FICHA` |
+| Falta saldo de algum insumo | 422 | `ESTOQUE_INSUFICIENTE` |
+
+**Depende de:** `FichaTecnicaService.listarItensDoPrato(pratoId)` (SCRUM-103) e `MovimentacaoEstoqueService.registrarBaixa(insumo, quantidade)` (SCRUM-99)
