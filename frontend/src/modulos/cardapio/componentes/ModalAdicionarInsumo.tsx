@@ -67,7 +67,7 @@ function ModalAdicionarInsumo({ aberto, pratoId, idsNaFicha, onFechar, onAdicion
       width={480}
       centered
       destroyOnHidden
-      title={<span style={{ fontFamily: "'Jost', sans-serif", fontWeight: 300, fontSize: 28 }}>Adicionar insumo</span>}
+      title={<span style={{ fontFamily: "'Jost', sans-serif", fontWeight: 300, fontSize: 30 }}>Adicionar insumo</span>}
       footer={
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
           <Button shape="round" size="large" onClick={fechar} disabled={salvando}>
@@ -80,6 +80,15 @@ function ModalAdicionarInsumo({ aberto, pratoId, idsNaFicha, onFechar, onAdicion
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 20 }}>
+        {erro && (
+          <div
+            role="alert"
+            style={{ background: '#FBEAEA', borderRadius: 10, padding: '12px 16px', color: '#8E2B20', fontSize: 13 }}
+          >
+            {erro}
+          </div>
+        )}
+
         <div>
           <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8 }}>Insumo</div>
           <Select
@@ -124,15 +133,6 @@ function ModalAdicionarInsumo({ aberto, pratoId, idsNaFicha, onFechar, onAdicion
           </div>
           <div style={{ fontSize: 12, color: '#6B645C', marginTop: 6 }}>A quantidade usa a unidade do insumo.</div>
         </div>
-
-        {erro && (
-          <div
-            role="alert"
-            style={{ background: '#F8E4E0', border: '1px solid #E4B4AB', borderRadius: 10, padding: '12px 16px', color: '#A63A2E', fontSize: 13 }}
-          >
-            {erro}
-          </div>
-        )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <span style={{ color: '#6B645C' }}>Custo desta linha</span>
