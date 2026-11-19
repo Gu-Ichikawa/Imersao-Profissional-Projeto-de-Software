@@ -225,6 +225,7 @@ throw new RegraNegocioException(HttpStatus.UNPROCESSABLE_ENTITY,      // 422
 ```
 
 Erros de validação (`@Valid`) voltam com status 400, código `VALIDACAO` e a lista de `campos` inválidos.
+Uma rota que não existe (ex.: `GET /api/rota-errada`) volta com status 404 e código `ROTA_NAO_ENCONTRADA`.
 
 ## API
 
