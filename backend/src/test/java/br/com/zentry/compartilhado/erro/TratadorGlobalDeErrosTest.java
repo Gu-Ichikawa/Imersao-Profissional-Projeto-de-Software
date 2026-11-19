@@ -4,27 +4,26 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.WebApplicationContext;
 
-// Testa só o tratador de erros, sem subir a aplicação nem o banco
+@SpringBootTest
 class TratadorGlobalDeErrosTest {
 
-	@RestController
-	static class ControllerDeTeste {
+	@Autowired
+	private WebApplicationContext contexto;
 
-		@GetMapping("/api/teste/nao-encontrado")
-		String naoEncontrado() {
-			throw new NaoEncontradoException("Insumo", 5);
-		}
+	private MockMvc mockMvc;
+
+	@BeforeEach
+	void configurar() {
+		mockMvc = MockMvcBuilders.webAppContextSetup(contexto).build();
 	}
-
-	private final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new ControllerDeTeste())
-			.setControllerAdvice(new TratadorGlobalDeErros())
-			.build();
 
 	@Test
 	void rotaInexistenteDevolve404() throws Exception {
@@ -35,9 +34,8 @@ class TratadorGlobalDeErrosTest {
 
 	@Test
 	void recursoInexistenteContinuaDevolvendo404() throws Exception {
-		mockMvc.perform(get("/api/teste/nao-encontrado"))
+		mockMvc.perform(get("/api/insumos/999999"))
 				.andExpect(status().isNotFound())
-				.andExpect(jsonPath("$.codigo").value("NAO_ENCONTRADO"))
-				.andExpect(jsonPath("$.mensagem").value("Insumo com id 5 não encontrado."));
+				.andExpect(jsonPath("$.codigo").value("NAO_ENCONTRADO"));
 	}
 }

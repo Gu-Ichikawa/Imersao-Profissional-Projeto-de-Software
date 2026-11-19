@@ -1,6 +1,5 @@
 import type { NivelEstoque } from '../servicos/insumoServico'
 
-// Cores das tags: padrão do Figma (pílula com bolinha à esquerda)
 const NIVEIS: Record<NivelEstoque, { rotulo: string; fundo: string; texto: string }> = {
   SUFICIENTE: { rotulo: 'Suficiente', fundo: '#EDF3EC', texto: '#2F5F3A' },
   ATENCAO: { rotulo: 'Atenção', fundo: '#FBF1DF', texto: '#8A5A00' },
@@ -35,7 +34,6 @@ function Pilula({ rotulo, fundo, texto }: PilulaProps) {
   )
 }
 
-// Insumo que não controla estoque não tem nível: mostra "—"
 export function TagNivelEstoque({ nivel }: { nivel: NivelEstoque | null }) {
   if (!nivel) {
     return <span style={{ color: '#9A938B' }}>—</span>

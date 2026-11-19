@@ -28,7 +28,7 @@ type ValoresFormulario = {
 }
 
 type ModalInsumoProps = {
-  // null = novo insumo; preenchido = editar esse insumo
+  // null = novo insumo
   insumo: Insumo | null
   onFechar: () => void
   onSalvo: (insumo: Insumo) => void
@@ -68,7 +68,7 @@ function ModalInsumo({ insumo, onFechar, onSalvo }: ModalInsumoProps) {
     try {
       valores = await form.validateFields()
     } catch {
-      return // os erros já aparecem embaixo de cada campo
+      return
     }
 
     const dados: InsumoRequest = {
@@ -80,7 +80,6 @@ function ModalInsumo({ insumo, onFechar, onSalvo }: ModalInsumoProps) {
       custoUnitario: valores.custoUnitario,
       controlaEstoque: valores.controlaEstoque,
       categoriaInsumoId: valores.categoriaInsumoId,
-      // na edição o saldo só muda por movimentação: não mandamos quantidade
       ...(insumo ? {} : { quantidadeInicial: valores.quantidadeInicial ?? 0 }),
     }
 
@@ -90,7 +89,6 @@ function ModalInsumo({ insumo, onFechar, onSalvo }: ModalInsumoProps) {
       const salvo = insumo ? await editarInsumo(insumo.id, dados) : await cadastrarInsumo(dados)
       onSalvo(salvo)
     } catch (e) {
-      // 400: marca cada campo inválido; 409 SKU repetido: marca o SKU; o resto: aviso no topo
       const campos = errosDeCampo(e)
       if (campos.length > 0) {
         form.setFields(campos.map((c) => ({ name: c.campo as keyof ValoresFormulario, errors: [c.mensagem] })))

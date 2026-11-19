@@ -46,7 +46,6 @@ public class TratadorGlobalDeErros {
 				.body(ErroResponse.de(400, "CORPO_INVALIDO", "O corpo da requisição está inválido ou mal formatado."));
 	}
 
-	// Rota que não existe na API (ex.: GET /api/rota-errada): 404 em vez de erro interno
 	@ExceptionHandler({ NoResourceFoundException.class, NoHandlerFoundException.class })
 	public ResponseEntity<ErroResponse> rotaNaoEncontrada(HttpServletRequest requisicao) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND)

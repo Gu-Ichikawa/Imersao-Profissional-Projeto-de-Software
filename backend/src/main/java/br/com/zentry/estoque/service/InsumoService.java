@@ -49,7 +49,7 @@ public class InsumoService {
                 request.controlaEstoque(),
                 buscarCategoria(request.categoriaInsumoId()),
                 request.quantidadeInicial());
-        // Quando o SCRUM-99 existir, registrar aqui uma ENTRADA com a quantidade inicial (ver README, seção API)
+        // TODO SCRUM-99: registrar uma ENTRADA com a quantidade inicial
         return InsumoResponse.de(insumoRepository.save(insumo));
     }
 
@@ -82,10 +82,7 @@ public class InsumoService {
         buscarPorId(id).ativar();
     }
 
-    /**
-     * Contrato interno: usado pela ficha técnica (SCRUM-103) e pela venda (SCRUM-105).
-     * Lança 404 se o insumo não existir.
-     */
+    // Usado pela ficha técnica e pela venda
     @Transactional(readOnly = true)
     public Insumo buscarPorId(Long id) {
         return insumoRepository.findById(id)
