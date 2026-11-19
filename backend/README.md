@@ -184,7 +184,7 @@ FROM item_ficha_tecnica i JOIN insumo ins ON ins.id = i.insumo_id;          -- 8
 SELECT tipo, quantidade FROM movimentacao_estoque;                          -- 5 ENTRADA
 ```
 
-### Roteiro da demo (quando as APIs estiverem prontas)
+### Roteiro da demo
 
 1. Listar insumos: aparecem os 5 insumos com saldo e nível de estoque
 2. Abrir o Hambúrguer artesanal: a ficha técnica mostra 5 insumos e custo **R$ 8,40**
@@ -468,6 +468,65 @@ O mesmo formato aparece no campo `categoria` do `PratoResponse`.
 | Categoria não existe | 404 | `NAO_ENCONTRADO` |
 | Nome já usado por outra categoria | 409 | `CATEGORIA_JA_CADASTRADA` |
 | Exclusão de categoria com prato vinculado | 409 | `CATEGORIA_COM_PRATOS` |
+
+### Ficha técnica e custo do prato (SCRUM-103)
+
+UC-CAR-003. RF-CAR-010, RF-CAR-011, RF-CAR-012.
+
+| Método | Rota | O que faz | Resposta |
+|---|---|---|---|
+| `GET` | `/api/pratos/{pratoId}/ficha-tecnica` | Busca a ficha do prato (cria uma vazia se ainda não existir) | 200 `FichaTecnicaResponse` |
+| `POST` | `/api/pratos/{pratoId}/ficha-tecnica/itens` | Adiciona um insumo à ficha | 201 `FichaTecnicaResponse` |
+| `PUT` | `/api/pratos/{pratoId}/ficha-tecnica/itens/{itemId}` | Altera a quantidade de um item | 200 `FichaTecnicaResponse` |
+| `DELETE` | `/api/pratos/{pratoId}/ficha-tecnica/itens/{itemId}` | Remove um item | 200 `FichaTecnicaResponse` |
+
+Todas as rotas devolvem a ficha inteira, com o custo já recalculado. O `DELETE` responde 200 (e não 204) porque a tela precisa do novo custo total.
+
+**Entrada:**
+
+```json
+{ "insumoId": 1, "quantidade": 150 }
+```
+
+- `POST` usa `ItemFichaRequest` (`insumoId` e `quantidade`); `PUT` usa `QuantidadeItemRequest` (só `quantidade`)
+- `quantidade` é obrigatória, maior que zero, com até 3 casas decimais, **na unidade do insumo** (sem conversão)
+- O mesmo insumo não pode aparecer duas vezes na mesma ficha
+
+**Saída (`FichaTecnicaResponse`), Hambúrguer artesanal com os dados do V3:**
+
+```json
+{
+  "pratoId": 1,
+  "pratoNome": "Hambúrguer artesanal",
+  "categoriaNome": "Lanches",
+  "precoVenda": 32.00,
+  "custoTotal": 8.40,
+  "atualizadaEm": "2026-11-19T18:00:00.123456",
+  "itens": [
+    { "id": 1, "insumoId": 1, "insumoNome": "Pão brioche", "unidadeMedida": "UNIDADE", "custoUnitario": 1.2000, "quantidade": 1, "custo": 1.2000 },
+    { "id": 2, "insumoId": 2, "insumoNome": "Carne bovina", "unidadeMedida": "G", "custoUnitario": 0.0380, "quantidade": 150, "custo": 5.7000 }
+  ]
+}
+```
+
+(lista resumida; a ficha real traz os 5 insumos)
+
+**Regras:**
+
+- Custo do item = `quantidade × custoUnitario` do insumo (4 casas); custo da ficha = soma dos itens, gravado com 2 casas em `ficha_tecnica.custo_total`
+- Toda alteração na ficha atualiza `custo_total` e `atualizada_em`
+
+**Erros:**
+
+| Quando | Status | `codigo` |
+|---|---|---|
+| `insumoId` ou `quantidade` faltando, quantidade ≤ 0 ou com mais de 3 casas | 400 | `VALIDACAO` (lista em `campos`) |
+| Prato, insumo ou item da ficha não existe | 404 | `NAO_ENCONTRADO` |
+| Insumo já está na ficha | 409 | `INSUMO_JA_NA_FICHA` |
+
+**Contrato interno (para outros tickets):**
+
+- `FichaTecnicaService.listarItensDoPrato(pratoId)`: devolve os itens (`ItemFichaTecnica`, com `getInsumo()` e `getQuantidade()`) ou lista vazia se o prato não tem ficha ou a ficha está sem itens. É o que a venda (SCRUM-105) usa. Chamar dentro de uma transação, pois o insumo é carregado sob demanda
 
 ### Venda e baixa de estoque (SCRUM-105)
 

@@ -14,8 +14,8 @@ e a baixa automática de insumos quando um prato é vendido.
 | Pratos (cadastro, edição, inativação) | ✅ | ✅ |
 | Categorias do cardápio | ✅ | ✅ |
 | Movimentações de estoque (entrada, retirada, ajuste) | ✅ | ✅ |
-| Ficha técnica e custo do prato | Pendente | Tela pronta, aguarda a API |
-| Registrar venda com baixa automática de estoque | Pendente | Tela pronta, aguarda a API |
+| Ficha técnica e custo do prato | ✅ | ✅ |
+| Registrar venda com baixa automática de estoque | ✅ | ✅ |
 
 > Atualize esta tabela ao concluir cada funcionalidade.
 
