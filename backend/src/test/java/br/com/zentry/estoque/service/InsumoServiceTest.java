@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
-// Usa o banco local (com os dados do V3). @Transactional desfaz tudo no fim de cada teste.
 @SpringBootTest
 @Transactional
 class InsumoServiceTest {

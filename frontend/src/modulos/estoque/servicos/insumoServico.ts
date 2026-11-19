@@ -1,6 +1,5 @@
 import api, { type Pagina } from '../../../compartilhado/servicos/api'
 
-// Mesmos nomes e valores da API de insumo (backend/README.md, seção "API")
 export type UnidadeMedida = 'KG' | 'G' | 'L' | 'ML' | 'UNIDADE'
 export type NivelEstoque = 'SUFICIENTE' | 'ATENCAO' | 'REPOR'
 
@@ -35,7 +34,7 @@ export type InsumoRequest = {
   custoUnitario: number
   controlaEstoque: boolean
   categoriaInsumoId: number
-  quantidadeInicial?: number // só no cadastro; na edição a API ignora
+  quantidadeInicial?: number // só no cadastro
 }
 
 export type FiltrosInsumo = {

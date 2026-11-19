@@ -21,12 +21,10 @@ type Consulta = {
   status: FiltroStatus
 }
 
-// Quantidades com separador de milhar: 2000 → "2.000"
 function quantidade(valor: number): string {
   return valor.toLocaleString('pt-BR', { maximumFractionDigits: 3 })
 }
 
-// Linhas inativas ficam em cinza (padrão do Figma)
 function corDoTexto(insumo: Insumo, principal: boolean): string {
   if (!insumo.ativo) return '#9A938B'
   return principal ? '#111111' : '#6B645C'
@@ -37,12 +35,10 @@ function InsumosPage() {
   const [dados, setDados] = useState<Pagina<Insumo> | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
-  // modal de cadastro/edição: null = fechado; { insumo: null } = novo; { insumo } = editar
   const [modalInsumo, setModalInsumo] = useState<{ insumo: Insumo | null } | null>(null)
   const [paraInativar, setParaInativar] = useState<Insumo | null>(null)
   const [avisos, contextoAvisos] = message.useMessage()
 
-  // Busca a lista sempre que a consulta (página ou filtros) muda
   useEffect(() => {
     let atual = true
     listarInsumos(consulta.pagina, consulta.tamanho, {
@@ -65,7 +61,6 @@ function InsumosPage() {
     }
   }, [consulta])
 
-  // Mudar a consulta (mesmo sem mudar nada) dispara uma nova busca
   function atualizar(mudancas: Partial<Consulta> = {}) {
     setCarregando(true)
     setConsulta((c) => ({ ...c, ...mudancas }))
